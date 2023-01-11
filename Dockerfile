@@ -1,13 +1,16 @@
-FROM node:16-slim
+FROM node:16-slim as base
 
-ENV NODE_ENV=production
-
-WORKDIR /app
+WORKDIR /code
 
 COPY package*.json ./
 
-RUN npm install --production
-
+FROM base as test
+RUN npm ci
 COPY . .
+RUN npm run test
 
+FROM base as prod
+ENV NODE_ENV=production
+RUN npm ci --production
+COPY . .
 CMD npm run start
